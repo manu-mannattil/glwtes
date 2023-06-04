@@ -133,20 +133,8 @@ def shell_evp(
             # longer be an eigenvector.
             vg[i] = 1j * vg[i]
 
-    div = np.empty((evals_N, N), dtype=np.complex128)
-    for i in range(evals_N):
-        solver.set_state(i, solver.subsystems[0])
-
-        divf = D(u) + 1j*l*v
-        divf = divf.evaluate()
-        divf.change_scales(1)
-        div[i] = divf["g"]
-
-        if div[i].real.std() < div[i].imag.std():
-            div[i] = 1j * div[i]
-
     x = dist.local_grid(basis)
-    return x, evals, zg, ug, vg, div
+    return x, evals, zg, ug, vg
 
 N = 2**11
 bc = "cc"
@@ -178,7 +166,7 @@ name = f"{form}_bc_{bc}_l_{l}_eps_{eps}_b{b}_a{a}_N_{N}"
 
 # Run ------------------------------------------------------------------
 
-x, evals, z, u, v, div = shell_evp(N=N, m=m, dm=dm, l=l, eps=eps, bc=bc)
-evals, z, u, v, div = sort_evals_modes(evals, z, u, v, div)
+x, evals, z, u, v = shell_evp(N=N, m=m, dm=dm, l=l, eps=eps, bc=bc)
+evals, z, u, v = sort_evals_modes(evals, z, u, v)
 
-np.savez(f"data/{name}", x=x, evals=evals, z=z, u=u, v=v, div=div)
+np.savez(f"data/{name}", x=x, evals=evals, z=z, u=u, v=v)

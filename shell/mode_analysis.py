@@ -9,7 +9,7 @@ import os
 def detect_quant(name):
     """Detect quantized modes in data/name.npz."""
     with np.load(f"data/{name}.npz") as dat:
-        x, evals, z, u, v, div = dat["x"], dat["evals"], dat["z"], dat["u"], dat["v"], dat["div"]
+        x, evals, z, u, v = dat["x"], dat["evals"], dat["z"], dat["u"], dat["v"]
 
     os.makedirs(f"data/{name}", exist_ok=True)
 
@@ -31,7 +31,9 @@ def detect_quant(name):
         else:
             s, c = "NO", "#999999"
 
-        plt.title(f"mode $n$ = {i}; eval = {evals[i]:.6f}; quantized? {s} [{third_index:.3f}, {edge_index:.3f}]", color=c)
+        plt.title(
+            f"mode $n$ = {i}; eval = {evals[i]:.6f}; quantized? {s} [{third_index:.3f}, {edge_index:.3f}]",
+            color=c)
         plt.xlabel(r"$x$")
         plt.ylabel(r"$\zeta, u,$ and $v$")
         plt.savefig(f"data/{name}/{i:04d}.png", dpi=100)
@@ -39,7 +41,6 @@ def detect_quant(name):
         print(f"mode {i} analyzed")
 
     np.savetxt(f"data/{name}/automated.txt", quantized, fmt="%d")
-
 
 def manual_to_freq(name, index="manual", out="quantized"):
     with np.load(f"data/{name}.npz") as dat:
@@ -59,14 +60,21 @@ def manual_to_freq(name, index="manual", out="quantized"):
     pack = np.array([quant, quant_range]).T
     np.savetxt(f"data/{name}/{out}.txt", pack, fmt="%.9f")
 
-N = 2**9
-bc = "ss"
+N = 2**11
+bc = "cc"
 eps = 0.01
 l = 0.1
 b = 0.1
 a = 0.01
 
-form = "gauss"
+# sech type ------------------------------------------------------------
+
+# form = "sech"
+# name = f"{form}_bc_{bc}_l_{l}_eps_{eps}_b{b}_a{a}_N_{N}"
+
+# tanh type ------------------------------------------------------------
+
+form = "tanh"
 name = f"{form}_bc_{bc}_l_{l}_eps_{eps}_b{b}_N_{N}"
 
 detect_quant(name)
