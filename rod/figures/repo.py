@@ -19,13 +19,6 @@ eps = 0.01
 with plt.rc_context(rc):
     fig, ax = plt.subplots()
 
-    labelpos = (0.08, 0.83)
-    w_min = 0.01
-    w_max = 0.1 + 0.01
-    w_guide = np.linspace(w_min, w_max, 10)
-    ticks = [0.02, 0.06, 0.1]
-    size = 3.7
-
     name = "tanh_bc_cc_b0.1_N_2048"
     pack = np.load("../data/{}.npz".format(name))
     x, evals, zz, uu = pack["x"], pack["evals"], pack["z"], pack["u"]

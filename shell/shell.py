@@ -14,7 +14,7 @@ config["logging"]["stdout_level"] = "debug"
 
 def shell_evp(
         L=2000, # length of the shell
-        l=1.2, # transverse wave number
+        l=0.1, # transverse wave number
         h=0.3, # Poisson's ratio
         m=1, # curvature m(x)
         dm=0, # curvature derivature dm(x)/dx

@@ -18,7 +18,7 @@ eps = 0.01
 b = 0.1
 a = 0.01
 
-def caustics(w, l=0.1, h=0.3, form="tanh", bowtie=False):
+def caustics(w, l=0.1, h=0.3, form="sech", bowtie=False):
     """Find all caustics (including bowtie caustics)."""
     if bowtie:
         m = flex_find_m(w, l, h)
@@ -34,24 +34,25 @@ with plt.rc_context(rc):
     fig, axes = plt.subplots(3, 2)
 
     xmax = 5
-    ymin, ymax = -3, 7
+    ymin, ymax = -1.5, 2
     wpos = 0.72, 0.74
     labelpos = 0.05, 0.75
 
-    name = "tanh_bc_cc_l_0.1_eps_0.01_b0.1_N_512"
+    name = "sech_bc_cc_l_0.1_eps_0.01_b0.1_a0.01_N_2048"
 
     pack = np.load("../data/{}.npz".format(name))
     x, evals, z, u, v = pack["x"], pack["evals"], pack["z"], pack["u"], pack["v"]
 
-    # flexural ------------------------------------------------------------- 
+    # flexural -------------------------------------------------------------
 
     ax = axes[0, 0]
 
     i = 0
 
-    ax.plot(x*eps, -z[i].real, "C3")
-    ax.plot(x*eps, -u[i].real, "C0", zorder=-10)
-    ax.plot(x*eps, -v[i].imag, "#333333", zorder=-10)
+    _z, _u, _v = normalize([z[i], u[i], v[i]], eps*x)
+    ax.plot(x*eps, _z.real, "C3")
+    ax.plot(x*eps, _u.real, "C0", zorder=-10)
+    ax.plot(x*eps, _v.imag, "#333333", zorder=-10)
     ax.set_xlim((-xmax, xmax))
     ax.set_ylim((ymin, ymax))
     ax.set_ylabel(r"$\zeta, u, \Im(v)$")
@@ -62,15 +63,16 @@ with plt.rc_context(rc):
     ax.plot([-c, -c], [-ymax, ymax], "#999999", linestyle="--", zorder=-100)
     ax.plot([c, c], [-ymax, ymax], "#999999", linestyle="--", zorder=-100)
 
-    # shear ------------------------------------------------------------- 
+    # shear -------------------------------------------------------------
 
     ax = axes[1, 0]
 
-    i = 114
+    i = 147
 
-    ax.plot(x*eps, z[i].real, "C3", zorder=-10)
-    ax.plot(x*eps, u[i].real, "C0")
-    ax.plot(x*eps, v[i].imag, "#333333", zorder=-5)
+    _z, _u, _v = normalize([z[i], u[i], v[i]], eps*x)
+    ax.plot(x*eps, _z.real, "C3")
+    ax.plot(x*eps, _u.real, "C0", zorder=-10)
+    ax.plot(x*eps, _v.imag, "#333333", zorder=-10)
     ax.set_xlim((-xmax, xmax))
     ax.set_ylim((ymin, ymax))
     ax.set_ylabel(r"$\zeta, u, \Im(v)$")
@@ -81,15 +83,16 @@ with plt.rc_context(rc):
     ax.plot([-c, -c], [-ymax, ymax], "#999999", linestyle="--", zorder=-100)
     ax.plot([c, c], [-ymax, ymax], "#999999", linestyle="--", zorder=-100)
 
-    # extensional ------------------------------------------------------------- 
+    # extensional -------------------------------------------------------------
 
     ax = axes[2, 0]
 
-    i = 199
+    i = 264
 
-    ax.plot(x*eps, -z[i].real, "C3", zorder=-10)
-    ax.plot(x*eps, -u[i].real, "C0", zorder=-5)
-    ax.plot(x*eps, -v[i].imag, "#333333")
+    _z, _u, _v = normalize([z[i], u[i], v[i]], eps*x)
+    ax.plot(x*eps, _z.real, "C3")
+    ax.plot(x*eps, _u.real, "C0", zorder=-10)
+    ax.plot(x*eps, _v.imag, "#333333", zorder=-10)
     ax.set_xlim((-xmax, xmax))
     ax.set_ylim((ymin, ymax))
     ax.set_ylabel(r"$\zeta, u, \Im(v)$")
@@ -102,20 +105,21 @@ with plt.rc_context(rc):
 
     ax.set_xlabel(r"$x$")
 
-    # new set on the right ------------------------------------------------- 
+    # new set on the right -------------------------------------------------
 
-    ymin, ymax = -3, 3
+    ymin, ymax = -1.5, 2
     xmax = 7
 
-    # flexural ------------------------------------------------------------- 
+    # flexural -------------------------------------------------------------
 
     ax = axes[0, 1]
 
-    i = 8
+    i = 13
 
-    ax.plot(x*eps, z[i].real, "C3")
-    ax.plot(x*eps, u[i].real, "C0", zorder=-10)
-    ax.plot(x*eps, v[i].imag, "#333333", zorder=-10)
+    _z, _u, _v = normalize([z[i], u[i], v[i]], eps*x)
+    ax.plot(x*eps, _z.real, "C3")
+    ax.plot(x*eps, _u.real, "C0", zorder=-10)
+    ax.plot(x*eps, _v.imag, "#333333", zorder=-10)
     ax.set_xlim((-xmax, xmax))
     ax.set_ylim((ymin, ymax))
     ax.set_ylabel(r"$\zeta, u, \Im(v)$")
@@ -130,15 +134,16 @@ with plt.rc_context(rc):
     ax.plot([-c, -c], [-ymax, ymax], "#999999", linestyle="--", zorder=-100)
     ax.plot([c, c], [-ymax, ymax], "#999999", linestyle="--", zorder=-100)
 
-    # shear ------------------------------------------------------------- 
+    # shear -------------------------------------------------------------
 
     ax = axes[1, 1]
 
-    i = 136
+    i = 171
 
-    ax.plot(x*eps, z[i].real, "C3", zorder=-10)
-    ax.plot(x*eps, u[i].real, "C0")
-    ax.plot(x*eps, v[i].imag, "#333333", zorder=-5)
+    _z, _u, _v = normalize([z[i], u[i], v[i]], eps*x)
+    ax.plot(x*eps, _z.real, "C3")
+    ax.plot(x*eps, _u.real, "C0", zorder=-10)
+    ax.plot(x*eps, _v.imag, "#333333", zorder=-10)
     ax.set_xlim((-xmax, xmax))
     ax.set_ylim((ymin, ymax))
     ax.set_ylabel(r"$\zeta, u, \Im(v)$")
@@ -149,15 +154,16 @@ with plt.rc_context(rc):
     ax.plot([-c, -c], [-ymax, ymax], "#999999", linestyle="--", zorder=-100)
     ax.plot([c, c], [-ymax, ymax], "#999999", linestyle="--", zorder=-100)
 
-    # extensional ------------------------------------------------------------- 
+    # extensional -------------------------------------------------------------
 
     ax = axes[2, 1]
 
-    i = 227
+    i = 288
 
-    ax.plot(x*eps, z[i].real, "C3", zorder=-10)
-    ax.plot(x*eps, u[i].real, "C0", zorder=-5)
-    ax.plot(x*eps, v[i].imag, "#333333")
+    _z, _u, _v = normalize([z[i], u[i], v[i]], eps*x)
+    ax.plot(x*eps, _z.real, "C3")
+    ax.plot(x*eps, _u.real, "C0", zorder=-10)
+    ax.plot(x*eps, _v.imag, "#333333", zorder=-10)
     ax.set_xlim((-xmax, xmax))
     ax.set_ylim((ymin, ymax))
     ax.set_ylabel(r"$\zeta, u, \Im(v)$")

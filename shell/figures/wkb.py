@@ -31,7 +31,7 @@ with plt.rc_context(rc):
     ax.set_xticks(ticks)
     ax.set_yticks(ticks)
 
-    name = "tanh_bc_cc_l_0.1_eps_0.01_b0.1_N_512"
+    name = "tanh_bc_cc_l_0.1_eps_0.01_b0.1_N_2048"
 
     w_wkb = np.loadtxt("../data/{}/wkb1.txt".format(name), unpack=True)[1]
     w = np.loadtxt("../data/{}/quantized1.txt".format(name), unpack=True)[0]
@@ -65,7 +65,7 @@ with plt.rc_context(rc):
     ax.set_xticks(ticks)
     ax.set_yticks(ticks)
 
-    name = "sech_bc_cc_l_0.1_eps_0.01_b0.1_N_512"
+    name = "sech_bc_cc_l_0.1_eps_0.01_b0.1_a0.01_N_2048"
 
     w_wkb = np.loadtxt("../data/{}/wkb1.txt".format(name), unpack=True)[1]
     w = np.loadtxt("../data/{}/quantized1.txt".format(name), unpack=True)[0]

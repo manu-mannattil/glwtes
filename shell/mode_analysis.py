@@ -69,16 +69,16 @@ a = 0.01
 
 # sech type ------------------------------------------------------------
 
-# form = "sech"
-# name = f"{form}_bc_{bc}_l_{l}_eps_{eps}_b{b}_a{a}_N_{N}"
+form = "sech"
+name = f"{form}_bc_{bc}_l_{l}_eps_{eps}_b{b}_a{a}_N_{N}"
 
 # tanh type ------------------------------------------------------------
 
-form = "tanh"
-name = f"{form}_bc_{bc}_l_{l}_eps_{eps}_b{b}_N_{N}"
+# form = "tanh"
+# name = f"{form}_bc_{bc}_l_{l}_eps_{eps}_b{b}_N_{N}"
 
-detect_quant(name)
+# detect_quant(name)
 
-# manual_to_freq(name, "manual1", "quantized1")
-# manual_to_freq(name, "manual2", "quantized2")
-# manual_to_freq(name, "manual3", "quantized3")
+manual_to_freq(name, "manual1", "quantized1")
+manual_to_freq(name, "manual2", "quantized2")
+manual_to_freq(name, "manual3", "quantized3")
