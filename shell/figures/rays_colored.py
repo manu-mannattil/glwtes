@@ -1,11 +1,43 @@
 # -*- coding: utf-8 -*-
 
-"""Plot rays for all three waves on a shell."""
+"""Plot rays for all three waves on a shell, with color-coded phase portraits."""
 
 import numpy as np
 import matplotlib.pyplot as plt
 import charu
+from matplotlib.colors import LinearSegmentedColormap, Normalize
+from scipy.linalg import null_space
+from dispersion import *
 from utils import *
+
+b = 0.1 # max curvature (tanh and sech)
+a = 0.01 # min curvature (sech only)
+eps = 0.01 # slowness parameter
+
+BlueRed_data = ["C0", "white", "C3"]
+BlueRed = LinearSegmentedColormap.from_list("BlueRed", BlueRed_data)
+
+def m1(x):
+    return b * np.tanh(x)
+
+def m2(x):
+    return b - (b - a) * sech(x)
+
+def D(k, l, m, w=0, h=0.3):
+    """Dispersion matrix."""
+    return np.array([[k**4 + 2 * k**2 * l**2 + l**4 + m**2 - w**2, -1j * k * m, -1j * l * h * m],
+                     [1j * k * m, k**2 + 0.5 * l**2 * (1 - h) - w**2, 0.5 * k * l * (1 + h)],
+                     [1j * l * h * m, 0.5 * k * l * (1 + h), l**2 + 0.5 * k**2 * (1 - h) - w**2]])
+
+@np.vectorize
+def ratio(x, k, l=0.1, h=0.3, mfunc=m1, mode=0, rcond=1e-10):
+    m = mfunc(x)
+    w = omega(k, l, m=m, h=h)[mode]
+    d = D(k, l, m, w, h)
+
+    z, u, v = np.abs(null_space(d, rcond=rcond).T[0])
+
+    return 2 * np.abs(z) / (2 * np.abs(z) + np.abs(u) + np.abs(v))
 
 rc = {
     "charu.doc": "rspa",
@@ -20,8 +52,13 @@ with plt.rc_context(rc):
     x_max = 4
     k_max = 0.2
     labelpos = (0.05, 0.85)
+    N = 300
 
-    # tanh (flexural) ------------------------------------------------------
+    x = np.linspace(-(x_max + 0.1), (x_max + 0.1), N)
+    k = np.linspace(-(k_max + 0.1), (k_max + 0.1), N)
+    xx, kk = np.meshgrid(x, k)
+
+    # tanh (flexural) ------------------------------------------------------ 
 
     ax = axes[0][0]
 
@@ -36,17 +73,26 @@ with plt.rc_context(rc):
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center", labelpad=0)
 
-    for r in r_eye:
-        ax.plot(r[0], r[1], "C3-")
+    for r in r_eye[::2]:
+        ax.plot(r[0], r[1], "k-")
 
     for r in r_eyebrows:
-        ax.plot(r[0], r[1], "C0-")
+        ax.plot(r[0], r[1], "k-")
 
     for r in r_eyelid:
         ax.plot(r[0], r[1], color="k", linestyle="--")
 
     for r in r_sides:
-        ax.plot(r[0], r[1], "C0-")
+        ax.plot(r[0], r[1], "k-")
+
+    r = ratio(xx, kk, mfunc=m1, mode=2)
+
+    # Add two invisible points outside xlim, ylim where the ratio is
+    # 0 and 1.  This is so that the colorbars represent the accurate
+    # ratio, and not the rescaled one.
+    r[0][0], r[1][0] = 0, 1
+
+    pcm = ax.pcolormesh(xx, kk, r, cmap=BlueRed, shading="nearest", rasterized=True)
 
     ax.text(*labelpos,
             r"\textbf{(a)}",
@@ -54,7 +100,7 @@ with plt.rc_context(rc):
             backgroundcolor="w",
             bbox=dict(facecolor="w", edgecolor="w", pad=1))
 
-    # sech (flexural) ------------------------------------------------------
+    # sech (flexural) ------------------------------------------------------ 
 
     ax = axes[1][0]
 
@@ -69,17 +115,26 @@ with plt.rc_context(rc):
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center", labelpad=0)
 
-    for r in r_eye:
-        ax.plot(r[0], r[1], "C3-")
+    for r in r_eye[::2]:
+        ax.plot(r[0], r[1], "k-")
 
     for r in r_eyebrows:
-        ax.plot(r[0], r[1], "C0-")
+        ax.plot(r[0], r[1], "k-")
 
     for r in r_eyelid:
         ax.plot(r[0], r[1], color="k", linestyle="--")
 
     for r in r_sides:
-        ax.plot(r[0], r[1], "C0-")
+        ax.plot(r[0], r[1], "k-")
+
+    r = ratio(xx, kk, mfunc=m2, mode=2)
+
+    # Add two invisible points outside xlim, ylim where the ratio is
+    # 0 and 1.  This is so that the colorbars represent the accurate
+    # ratio, and not the rescaled one.
+    r[0][0], r[1][0] = 0, 1
+
+    pcm = ax.pcolormesh(xx, kk, r, cmap=BlueRed, shading="nearest", rasterized=True)
 
     ax.text(*labelpos,
             r"\textbf{(d)}",
@@ -87,7 +142,7 @@ with plt.rc_context(rc):
             backgroundcolor="w",
             bbox=dict(facecolor="w", edgecolor="w", pad=1))
 
-    # tanh (shear) ------------------------------------------------------
+    # tanh (shear) ------------------------------------------------------ 
 
     ax = axes[0][1]
 
@@ -101,14 +156,23 @@ with plt.rc_context(rc):
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center", labelpad=0)
 
-    for r in r_eye:
-        ax.plot(r[0], r[1], "C3-")
+    for r in r_eye[::2]:
+        ax.plot(r[0], r[1], "k-")
 
     for r in r_eyebrows:
-        ax.plot(r[0], r[1], "C0-")
+        ax.plot(r[0], r[1], "k-")
 
     for r in r_eyelid:
         ax.plot(r[0], r[1], color="k", linestyle="--")
+
+    r = ratio(xx, kk, mfunc=m1, mode=1)
+
+    # Add two invisible points outside xlim, ylim where the ratio is
+    # 0 and 1.  This is so that the colorbars represent the accurate
+    # ratio, and not the rescaled one.
+    r[0][0], r[1][0] = 0, 1
+
+    pcm = ax.pcolormesh(xx, kk, r, cmap=BlueRed, shading="nearest", rasterized=True)
 
     ax.text(*labelpos,
             r"\textbf{(b)}",
@@ -116,7 +180,7 @@ with plt.rc_context(rc):
             backgroundcolor="w",
             bbox=dict(facecolor="w", edgecolor="w", pad=1))
 
-    # sech (shear) ------------------------------------------------------
+    # sech (shear) ------------------------------------------------------ 
 
     ax = axes[1][1]
 
@@ -130,14 +194,23 @@ with plt.rc_context(rc):
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center", labelpad=0)
 
-    for r in r_eye:
-        ax.plot(r[0], r[1], "C3-")
+    for r in r_eye[::2]:
+        ax.plot(r[0], r[1], "k-")
 
     for r in r_eyebrows:
-        ax.plot(r[0], r[1], "C0-")
+        ax.plot(r[0], r[1], "k-")
 
     for r in r_eyelid:
         ax.plot(r[0], r[1], color="k", linestyle="--")
+
+    r = ratio(xx, kk, mfunc=m2, mode=1)
+
+    # Add two invisible points outside xlim, ylim where the ratio is
+    # 0 and 1.  This is so that the colorbars represent the accurate
+    # ratio, and not the rescaled one.
+    r[0][0], r[1][0] = 0, 1
+
+    pcm = ax.pcolormesh(xx, kk, r, cmap=BlueRed, shading="nearest", rasterized=True)
 
     ax.text(*labelpos,
             r"\textbf{(e)}",
@@ -145,7 +218,7 @@ with plt.rc_context(rc):
             backgroundcolor="w",
             bbox=dict(facecolor="w", edgecolor="w", pad=1))
 
-    # tanh (ext) ------------------------------------------------------
+    # tanh (ext) ------------------------------------------------------ 
 
     ax = axes[0][2]
 
@@ -159,14 +232,23 @@ with plt.rc_context(rc):
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center", labelpad=0)
 
-    for r in r_eye:
-        ax.plot(r[0], r[1], "C3-")
+    for r in r_eye[::2]:
+        ax.plot(r[0], r[1], "k-")
 
     for r in r_eyebrows:
-        ax.plot(r[0], r[1], "C0-")
+        ax.plot(r[0], r[1], "k-")
 
     for r in r_eyelid:
         ax.plot(r[0], r[1], color="k", linestyle="--")
+
+    r = ratio(xx, kk, mfunc=m1, mode=0)
+
+    # Add two invisible points outside xlim, ylim where the ratio is
+    # 0 and 1.  This is so that the colorbars represent the accurate
+    # ratio, and not the rescaled one.
+    r[0][0], r[1][0] = 0, 1
+
+    pcm = ax.pcolormesh(xx, kk, r, cmap=BlueRed, shading="nearest", rasterized=True)
 
     ax.text(*labelpos,
             r"\textbf{(c)}",
@@ -174,7 +256,7 @@ with plt.rc_context(rc):
             backgroundcolor="w",
             bbox=dict(facecolor="w", edgecolor="w", pad=1))
 
-    # sech (ext) ------------------------------------------------------
+    # sech (ext) ------------------------------------------------------ 
 
     ax = axes[1][2]
 
@@ -188,14 +270,23 @@ with plt.rc_context(rc):
     ax.set_xlabel(r"$x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center", labelpad=0)
 
-    for r in r_eye:
-        ax.plot(r[0], r[1], "C3-")
+    for r in r_eye[::2]:
+        ax.plot(r[0], r[1], "k-")
 
     for r in r_eyebrows:
-        ax.plot(r[0], r[1], "C0-")
+        ax.plot(r[0], r[1], "k-")
 
     for r in r_eyelid:
         ax.plot(r[0], r[1], color="k", linestyle="--")
+
+    r = ratio(xx, kk, mfunc=m2, mode=0)
+
+    # Add two invisible points outside xlim, ylim where the ratio is
+    # 0 and 1.  This is so that the colorbars represent the accurate
+    # ratio, and not the rescaled one.
+    r[0][0], r[1][0] = 0, 1
+
+    pcm = ax.pcolormesh(xx, kk, r, cmap=BlueRed, shading="nearest", rasterized=True)
 
     ax.text(*labelpos,
             r"\textbf{(f)}",
@@ -205,7 +296,7 @@ with plt.rc_context(rc):
 
     plt.tight_layout()
     plt.savefig(
-        "shell_rays.pdf",
+        "shell_rays_inc.pdf",
         crop=True,
         optimize=True,
         transparent=True,
