@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Plot the example bound states of the shell (tanh type)."""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import charu
@@ -18,7 +20,7 @@ eps = 0.01
 b = 0.1
 a = 0.01
 
-def caustics(w, l=0.1, h=0.3, form="sech", bowtie=False):
+def caustics(w, l=0.1, h=0.3, form="tanh", bowtie=False):
     """Find all caustics (including bowtie caustics)."""
     if bowtie:
         m = flex_find_m(w, l, h)
@@ -34,11 +36,11 @@ with plt.rc_context(rc):
     fig, axes = plt.subplots(3, 2)
 
     xmax = 5
-    ymin, ymax = -1.5, 2
+    ymin, ymax = -1.25, 2.5
     wpos = 0.72, 0.74
     labelpos = 0.05, 0.75
 
-    name = "sech_bc_cc_l_0.1_eps_0.01_b0.1_a0.01_N_2048"
+    name = "tanh_bc_cc_l_0.1_eps_0.01_b0.1_N_2048"
 
     pack = np.load("../data/{}.npz".format(name))
     x, evals, z, u, v = pack["x"], pack["evals"], pack["z"], pack["u"], pack["v"]
@@ -67,7 +69,7 @@ with plt.rc_context(rc):
 
     ax = axes[1, 0]
 
-    i = 147
+    i = 153
 
     _z, _u, _v = normalize([z[i], u[i], v[i]], eps*x)
     ax.plot(x*eps, _z.real, "C3")
@@ -87,7 +89,7 @@ with plt.rc_context(rc):
 
     ax = axes[2, 0]
 
-    i = 264
+    i = 265
 
     _z, _u, _v = normalize([z[i], u[i], v[i]], eps*x)
     ax.plot(x*eps, _z.real, "C3")
@@ -114,7 +116,7 @@ with plt.rc_context(rc):
 
     ax = axes[0, 1]
 
-    i = 13
+    i = 8
 
     _z, _u, _v = normalize([z[i], u[i], v[i]], eps*x)
     ax.plot(x*eps, _z.real, "C3")
@@ -138,7 +140,7 @@ with plt.rc_context(rc):
 
     ax = axes[1, 1]
 
-    i = 171
+    i = 180
 
     _z, _u, _v = normalize([z[i], u[i], v[i]], eps*x)
     ax.plot(x*eps, _z.real, "C3")
@@ -158,7 +160,7 @@ with plt.rc_context(rc):
 
     ax = axes[2, 1]
 
-    i = 288
+    i = 301
 
     _z, _u, _v = normalize([z[i], u[i], v[i]], eps*x)
     ax.plot(x*eps, _z.real, "C3")
@@ -184,7 +186,7 @@ with plt.rc_context(rc):
 
     plt.tight_layout(w_pad=3)
     plt.savefig(
-        "shell_modes.pdf",
+        "shell_modes_tanh.pdf",
         crop=True,
         optimize=True,
         transparent=True,
