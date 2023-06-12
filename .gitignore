@@ -9,7 +9,6 @@
 *.tex
 *.pdf_tex
 Makefile
-*.nb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
