@@ -37,7 +37,7 @@ def ratio(x, k, l=0.1, h=0.3, mfunc=m1, mode=0, rcond=1e-10):
 
     z, u, v = np.abs(null_space(d, rcond=rcond).T[0])
 
-    return 2 * np.abs(z) / (2 * np.abs(z) + np.abs(u) + np.abs(v))
+    return z/(u + v + z)
 
 rc = {
     "charu.doc": "rspa",
@@ -70,7 +70,7 @@ with plt.rc_context(rc):
 
     ax.set_xlim(-x_max, x_max)
     ax.set_ylim(-k_max, k_max)
-    ax.set_xlabel(r"$x$")
+    ax.set_xlabel(r"$\epsilon x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center", labelpad=0)
 
     for r in r_eye[::2]:
@@ -112,7 +112,7 @@ with plt.rc_context(rc):
 
     ax.set_xlim(-x_max, x_max)
     ax.set_ylim(-k_max, k_max)
-    ax.set_xlabel(r"$x$")
+    ax.set_xlabel(r"$\epsilon x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center", labelpad=0)
 
     for r in r_eye[::2]:
@@ -153,7 +153,7 @@ with plt.rc_context(rc):
 
     ax.set_xlim(-x_max, x_max)
     ax.set_ylim(-k_max, k_max)
-    ax.set_xlabel(r"$x$")
+    ax.set_xlabel(r"$\epsilon x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center", labelpad=0)
 
     for r in r_eye[::2]:
@@ -191,7 +191,7 @@ with plt.rc_context(rc):
 
     ax.set_xlim(-x_max, x_max)
     ax.set_ylim(-k_max, k_max)
-    ax.set_xlabel(r"$x$")
+    ax.set_xlabel(r"$\epsilon x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center", labelpad=0)
 
     for r in r_eye[::2]:
@@ -229,7 +229,7 @@ with plt.rc_context(rc):
 
     ax.set_xlim(-x_max, x_max)
     ax.set_ylim(-k_max, k_max)
-    ax.set_xlabel(r"$x$")
+    ax.set_xlabel(r"$\epsilon x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center", labelpad=0)
 
     for r in r_eye[::2]:
@@ -267,7 +267,7 @@ with plt.rc_context(rc):
 
     ax.set_xlim(-x_max, x_max)
     ax.set_ylim(-k_max, k_max)
-    ax.set_xlabel(r"$x$")
+    ax.set_xlabel(r"$\epsilon x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center", labelpad=0)
 
     for r in r_eye[::2]:

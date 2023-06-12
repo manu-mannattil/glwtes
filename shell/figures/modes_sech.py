@@ -105,7 +105,7 @@ with plt.rc_context(rc):
     ax.plot([-c, -c], [-ymax, ymax], "#999999", linestyle="--", zorder=-100)
     ax.plot([c, c], [-ymax, ymax], "#999999", linestyle="--", zorder=-100)
 
-    ax.set_xlabel(r"$x$")
+    ax.set_xlabel(r"$\epsilon x$")
 
     # new set on the right -------------------------------------------------
 
@@ -176,7 +176,7 @@ with plt.rc_context(rc):
     ax.plot([-c, -c], [-ymax, ymax], "#999999", linestyle="--", zorder=-100)
     ax.plot([c, c], [-ymax, ymax], "#999999", linestyle="--", zorder=-100)
 
-    ax.set_xlabel(r"$x$")
+    ax.set_xlabel(r"$\epsilon x$")
 
     # Put a manual legend below the plots.
     colors = ["C3", "C0", "#333333"]

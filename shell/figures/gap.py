@@ -70,7 +70,7 @@ with plt.rc_context(rc):
     ax.set_ylim(0, 0.1)
     ax.set_yticks([0, 0.05, 0.1])
     ax.set_xlabel(r"$m$")
-    ax.set_ylabel(r"$\omega$ (cut-on)")
+    ax.set_ylabel(r"$\omega_\mathsf{cut-on}$")
     ax.plot([m_critical, m_critical], [-1, 1], "#999999", linestyle="--", zorder=-10)
 
     ax.text(*labelpos,
@@ -89,7 +89,7 @@ with plt.rc_context(rc):
     ax.set_ylim(0.05, 0.1)
     ax.set_yticks([0.05, 0.075, 0.1])
     ax.set_xlabel(r"$m$")
-    ax.set_ylabel(r"$\omega$ (cut-on)")
+    ax.set_ylabel(r"$\omega_\mathsf{cut-on}$")
     ax.plot([m_critical, m_critical], [-1, 1], "#999999", linestyle="--", zorder=-10)
 
     # The shear-wave gap asymptotes to a constant value as m -> infty.
@@ -109,7 +109,7 @@ with plt.rc_context(rc):
     ax.plot(mm, ww[:, 0], "C0")
     ax.set_xlim(0, 0.1)
     ax.set_xlabel(r"$m$")
-    ax.set_ylabel(r"$\omega$ (cut-on)")
+    ax.set_ylabel(r"$\omega_\mathsf{cut-on}$")
 
     ax.text(*labelpos,
             r"\textbf{(c)}",

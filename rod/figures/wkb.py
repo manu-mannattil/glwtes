@@ -8,7 +8,7 @@ from utils import *
 
 rc = {
     "charu.doc": "rspa",
-    "figure.figsize": [300 * charu.pt, 300 * charu.pt],
+    "figure.figsize": [275 * charu.pt, 275 * charu.pt],
     "charu.tex": True,
     "charu.tex.font": "fourier",
 }
