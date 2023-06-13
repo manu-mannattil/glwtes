@@ -1,6 +1,6 @@
 # Wave localization in thin elastic structures
 
-[![arXiv](https://shields.io/badge/arXiv-2112.04279-b31b1b)](http://arxiv.org/abs/2112.04279)
+[![arXiv](https://shields.io/badge/arXiv-2306.07213-b31b1b)](https://arxiv.org/abs/2306.07213)
 
 ## Usage
 
