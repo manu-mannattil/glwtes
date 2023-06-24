@@ -20,7 +20,7 @@ rc = {
 with plt.rc_context(rc):
     fig, ax = plt.subplots()
     im = ax.imshow(np.linspace(0, 1, 100).reshape((10, 10)), cmap=BlueRed)
-    fig.colorbar(im, ax=ax, location="bottom", ticks=[0, 0.25, 0.5, 0.75, 1.0])
+    fig.colorbar(im, ax=ax, location="bottom", ticks=[0, 0.25, 0.5, 0.75, 1.0], aspect=30)
     ax.remove()
 
     plt.tight_layout()

@@ -157,12 +157,12 @@ name = f"{form}_bc_{bc}_l_{l}_eps_{eps}_b{b}_a{a}_N_{N}"
 # dm = lambda x: b / np.cosh(x) ** 2
 # name = f"{form}_bc_{bc}_l_{l}_eps_{eps}_b{b}_N_{N}"
 
-# gauss type ------------------------------------------------------------
+# altsech type ---------------------------------------------------------
 
-# form = "gauss"
-# m = lambda x: b * np.exp(-x**2)
-# dm = lambda x: -2*b*x*np.exp(-x**2)
-# name = f"{form}_bc_{bc}_l_{l}_eps_{eps}_b{b}_N_{N}"
+# form = "altsech"
+# m = lambda x: b*sech(x)
+# dm = lambda x: -b*np.tanh(x)*sech(x)
+# name = f"{form}_bc_{bc}_l_{l}_eps_{eps}_b{b}_a{a}_N_{N}"
 
 # Run ------------------------------------------------------------------
 
