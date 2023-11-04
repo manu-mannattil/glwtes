@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Solve the curved rod equations and find the eigenmodes."""
+"""Solve the simpler curved rod equations and find the eigenmodes."""
 
 import dedalus.public as d3
 import matplotlib.pyplot as plt
@@ -9,15 +9,34 @@ import numpy as np
 from scipy.integrate import trapezoid
 from utils import *
 
-def rod_evp(L=2000,  # interval of rod: [-L/2, L/2]
-            m=1,     # curvature m
-            dm=0,    # dm/dx^2
-            d2m=0,   # d^2m/dx^2
-            N=2**7,  # number of points
-            bc="cc", # boundary condition
-            mu=0.01, # epsilon in paper
-            e=1,     # include extra terms (compared to simpler rod model)
+def rod_evp(L=2000,
+            h=1,
+            m=1,
+            dm=0,
+            bc="cc",
+            N=2**7,
+            slowness=0.01,
+            slow_deriv=False,
             evals_only=False):
+
+    # ------------- Slowness Parameters -------------
+
+    if slow_deriv:
+        # Use eps to include a "global" slowness in all derivates.
+        # This is like replacing all derivatives d/dx with eps*d/dx,
+        # eps being the "slowness" parameter.  Set the curvature
+        # slowness (mu) to 1 in that case.
+        eps, mu = slowness, 1
+    else:
+        # Use mu to only include curvature slowness in the
+        # equations, i.e., curvature is a function of the form
+        # f(mu*x).  Set the global slowness (eps) to 1 in that case.
+        mu, eps = slowness, 1
+
+    # NOTE: Irrespective of how slowness is set (i.e., via
+    # eps or mu), the computed eigenvalues must be the same!  If
+    # they aren't the same, there is a bug in the
+    # implementation.
 
     # ------------- Problem Setup -------------
 
@@ -51,9 +70,6 @@ def rod_evp(L=2000,  # interval of rod: [-L/2, L/2]
     tau_u2 = dist.Field(name="tau_u2")
     u2 = D(u1) + lift(tau_u2)
 
-    # NOTE: We don't add a tau field for u3 as we don't have any extra
-    # boundary conditions to use.  Just use D(u2) in the equations.
-
     # Make use of only the curvature slowness here.
     # NCC fields for curvature and derivative of curvature.
     if callable(m):
@@ -66,23 +82,17 @@ def rod_evp(L=2000,  # interval of rod: [-L/2, L/2]
     if callable(dm):
         dmf = dist.Field(name="dm", bases=basis)
         dmf["g"] = mu * dm(mu * x)
-        dm_left, dm_right = dm(L / 2), dm(-L / 2)
     else:
         dmf = dm
-        dm_left, dm_right = 0, 0
-
-    if callable(d2m):
-        d2mf = dist.Field(name="d2m", bases=basis)
-        d2mf["g"] = mu ** 2 * d2m(mu * x)
-    else:
-        d2mf = d2m
 
     problem = d3.EVP([z, u, tau_z1, tau_z2, tau_z3, tau_z4, tau_u1, tau_u2],
                      eigenvalue=omega2,
                      namespace=locals())
 
-    problem.add_equation("z4 + mf**2*z + e*mf*D(u2) - mf*u1 + 2*e*dmf*u2 + e*d2mf*u1 - omega2*z = 0")
-    problem.add_equation("-e*mf*z3 + mf*z1 + dmf*z - e*dmf*z2 - (1 + e*mf**2)*u2 - 2*e*mf*dmf*u1 - omega2*u = 0")
+    # Only make use of the "global" (aka derivative) slowness here.
+    # Derivative expression, e.g., dm must also be multiplied by eps.
+    problem.add_equation("h**2*eps**4*z4 + mf**2*z - eps*mf*u1 - omega2*z/(h**2) = 0")
+    problem.add_equation("eps*mf*z1 + eps*dmf*z - eps**2*u2 - omega2*u/(h**2) = 0")
 
     # ------------ Boundary Conditions ------------ #
 
@@ -91,26 +101,26 @@ def rod_evp(L=2000,  # interval of rod: [-L/2, L/2]
         problem.add_equation("z(x=-L/2) = 0")
         problem.add_equation("u(x=-L/2) = 0")
     elif bc[0] == "s": # simply supported
-        problem.add_equation(f"z2(x=-L/2) + {m_left}*u1(x=-L/2) = 0")
+        problem.add_equation("z2(x=-L/2) = 0")
         problem.add_equation("z(x=-L/2) = 0")
         problem.add_equation("u(x=-L/2) = 0")
     else: # free
-        problem.add_equation(f"z3(x=-L/2) + {dm_left}*u1(x=-L/2) + {m_left}*u2(x=-L/2) = 0")
-        problem.add_equation(f"z2(x=-L/2) + {m_left}*u1(x=-L/2) = 0")
-        problem.add_equation(f"u1(x=-L/2) - {m_left}*z(x=-L/2) + {m_left}**2*u1(x=-L/2) + {m_left}*z2(x=-L/2) = 0")
+        problem.add_equation("z3(x=-L/2) = 0")
+        problem.add_equation("z2(x=-L/2) = 0")
+        problem.add_equation(f"u1(x=-L/2) - {m_left}*z(x=-L/2) = 0")
 
     if bc[1] == "c":
         problem.add_equation("z1(x=L/2) = 0")
         problem.add_equation("z(x=L/2) = 0")
         problem.add_equation("u(x=L/2) = 0")
     elif bc[1] == "s":
-        problem.add_equation(f"z2(x=L/2) + {m_right}*u1(x=L/2) = 0")
+        problem.add_equation("z2(x=L/2) = 0")
         problem.add_equation("z(x=L/2) = 0")
         problem.add_equation("u(x=L/2) = 0")
     else:
-        problem.add_equation(f"z3(x=L/2) + {dm_left}*u1(x=L/2) + {m_left}*u2(x=L/2) = 0")
-        problem.add_equation(f"z2(x=L/2) + {m_right}*u1(x=L/2) = 0")
-        problem.add_equation(f"u1(x=L/2) - {m_left}*z(x=L/2) + {m_left}**2*u1(x=L/2) + {m_left}*z2(x=L/2) = 0")
+        problem.add_equation("z3(x=L/2) = 0")
+        problem.add_equation("z2(x=L/2) = 0")
+        problem.add_equation(f"u1(x=L/2) - {m_left}*z(x=L/2) = 0")
 
     # ------------ Solve ------------ #
 
@@ -141,22 +151,20 @@ a = 0.01
 
 # tanh type ------------------------------------------------------------
 
-# form = "tanh"
-# name = f"{form}_bc_{bc}_b{b}_N_{N}"
-# m = lambda x: b * np.tanh(x)
-# dm = lambda x: b * sech(x) ** 2
-# d2m = lambda x: -2*b*sech(x)**2*np.tanh(x)
+form = "tanh"
+name = f"simple_{form}_bc_{bc}_b{b}_N_{N}"
+m = lambda x: b * np.tanh(x)
+dm = lambda x: b / np.cosh(x)**2
 
 # sech type ------------------------------------------------------------
 
-form = "sech"
-name = f"{form}_bc_{bc}_b{b}_a{a}_N_{N}"
-m = lambda x: b - (b - a) * sech(x)
-dm = lambda x: (b - a) * np.tanh(x) * sech(x)
-d2m = lambda x: (b - a) * (-sech(x)**3 + sech(x)*np.tanh(x)**2)
+# form = "sech"
+# name = f"simple_{form}_bc_{bc}_b{b}_a{a}_N_{N}"
+# m = lambda x: b - (b - a) * sech(x)
+# dm = lambda x: (b - a) * np.tanh(x) * sech(x)
 
 # Run ------------------------------------------------------------------
 
-x, evals, z, u = rod_evp(N=N, m=m, dm=dm, d2m=d2m, bc=bc)
+x, evals, z, u = rod_evp(N=N, m=m, dm=dm, bc=bc)
 evals, z, u = sort_evals_modes(evals, z, u)
 np.savez(f"data/{name}.npz", x=x, evals=evals, z=z, u=u)

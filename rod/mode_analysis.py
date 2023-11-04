@@ -64,13 +64,13 @@ a = 0.01
 
 # tanh type ------------------------------------------------------------
 
-form = "tanh"
-name = f"{form}_bc_{bc}_b{b}_N_{N}"
+# form = "tanh"
+# name = f"{form}_bc_{bc}_b{b}_N_{N}"
 
 # sech type ----------------------------------------------------------
 
 # form = "sech"
 # name = f"{form}_bc_{bc}_b{b}_a{a}_N_{N}"
 
-# detect_quant(name)
+detect_quant(name)
 manual_to_freq(name)

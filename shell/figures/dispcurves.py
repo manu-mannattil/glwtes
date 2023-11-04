@@ -7,7 +7,7 @@ from dispersion import *
 
 rc = {
     "charu.doc": "rspa",
-    "figure.figsize": [380 * charu.pt, 380 * charu.pt / charu.golden / 2.25],
+    "figure.figsize": [420 * charu.pt, 380 * charu.pt / charu.golden / 2.25],
     "charu.tex": True,
     "charu.tex.font": "fourier",
     "axes.axisbelow": False,
@@ -25,6 +25,15 @@ with plt.rc_context(rc):
 
     k = np.linspace(0, 0.2, 300)
     w = np.array([omega(_, l, h, m) for _ in k])
+
+    zero_point = 0.15
+    def ymin(y1, y2):
+        return (y1 - zero_point*y2)/(1 - zero_point)
+
+    def yticks(y1, y2):
+        ticks = np.round([y1, 0.5*y1 + 0.5*y2, y2], 3)
+        labels = ["{:.3f}".format(d) for d in ticks]
+        return ticks, labels
 
     # Flexural ---------------------------------------------------------------
 
@@ -48,16 +57,20 @@ with plt.rc_context(rc):
     ax.plot(-k[::-1], w[:, 2][::-1], color="C0")
 
     ax.minorticks_on()
-    ax.set_ylim((l**2, 0.075))
     ax.set_xlim((-0.25, 0.25))
-    ax.set_yticks([0.010, 0.060])
-    ax.set_yticklabels(["0.01", "0.06"],
+
+    w_cut, w_max = l**2, 0.075
+    w_min = ymin(w_cut, w_max)
+    ax.set_ylim((w_min, w_max))
+
+    ticks, labels = yticks(w_cut, w_max)
+    ax.set_yticks(ticks)
+    ax.set_yticklabels(labels,
                        bbox={
                            "boxstyle": "square, pad=0.2",
                            "facecolor": "white",
                            "linewidth": 0,
                        })
-
 
     ax.text(1.05,
             -0.025,
@@ -105,10 +118,15 @@ with plt.rc_context(rc):
     ax.plot(-k[::-1], w[:, 1][::-1], color="C0")
 
     ax.minorticks_on()
-    ax.set_ylim(np.sqrt(0.5*(1-h)*l**2), 0.08)
     ax.set_xlim((-0.1, 0.1))
-    ax.set_yticks([0.059, 0.069, 0.079])
-    ax.set_yticklabels(["0.059", "0.069", "0.079"],
+
+    w_cut, w_max = np.sqrt(0.5*(1-h)*l**2), 0.08
+    w_min = ymin(w_cut, w_max)
+    ax.set_ylim((w_min, w_max))
+
+    ticks, labels = yticks(w_cut, w_max)
+    ax.set_yticks(ticks)
+    ax.set_yticklabels(labels,
                        bbox={
                            "boxstyle": "square, pad=0.2",
                            "facecolor": "white",
@@ -156,11 +174,15 @@ with plt.rc_context(rc):
     ax.plot(-k[::-1], w[:, 0][::-1], color="C0")
 
     ax.minorticks_on()
-    ax.set_ylim((0.1, 0.11))
     ax.set_xlim((-0.05, 0.05))
-    ax.set_xticks([-0.05, 0.00, 0.05])
-    ax.set_yticks([0.1, 0.11])
-    ax.set_yticklabels(["0.10", "0.11"],
+
+    w_cut, w_max = l, 0.11
+    w_min = ymin(w_cut, w_max)
+    ax.set_ylim((w_min, w_max))
+
+    ticks, labels = yticks(w_cut, w_max)
+    ax.set_yticks(ticks)
+    ax.set_yticklabels(labels,
                        bbox={
                            "boxstyle": "square, pad=0.2",
                            "facecolor": "white",
@@ -189,7 +211,7 @@ with plt.rc_context(rc):
 
     # Export ---------------------------------------------------------------
 
-    plt.tight_layout(h_pad=1.5)
+    plt.tight_layout(h_pad=4)
     plt.savefig(
         "shell_disp.pdf",
         crop=True,

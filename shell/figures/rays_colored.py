@@ -41,7 +41,7 @@ def ratio(x, k, l=0.1, h=0.3, mfunc=m1, mode=0, rcond=1e-10):
 
 rc = {
     "charu.doc": "rspa",
-    "figure.figsize": [386 * charu.pt, 772 * charu.pt / charu.golden / 2.28],
+    "figure.figsize": [420 * charu.pt, 772 * charu.pt / charu.golden / 2.28],
     "charu.tex": True,
     "charu.tex.font": "fourier",
 }
@@ -294,7 +294,7 @@ with plt.rc_context(rc):
             backgroundcolor="w",
             bbox=dict(facecolor="w", edgecolor="w", pad=1))
 
-    plt.tight_layout()
+    plt.tight_layout(w_pad=3)
     plt.savefig(
         "shell_rays_inc.pdf",
         crop=True,

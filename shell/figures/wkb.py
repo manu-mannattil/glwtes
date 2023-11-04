@@ -4,8 +4,8 @@ import charu
 from utils import *
 
 rc = {
-    "charu.doc": "rspa",
-    "figure.figsize": [300 * charu.pt, 300 * charu.pt],
+    "charu.doc": "aps",
+    "figure.figsize": [267 * charu.pt, 283 / charu.golden * charu.pt],
     "charu.tex": True,
     "charu.tex.font": "fourier",
 }
@@ -14,7 +14,7 @@ with plt.rc_context(rc):
     fig, axes = plt.subplots(1, 2)
 
     w_min = 0.0
-    w_max = 0.1 + 0.02
+    w_max = 0.1 + 0.028
 
     ticks = [0, 0.04, 0.08, 0.12]
     labelpos = (0.06, 0.89)

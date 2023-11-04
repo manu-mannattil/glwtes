@@ -10,7 +10,7 @@ BlueRed = LinearSegmentedColormap.from_list("BlueRed", BlueRed_data)
 
 rc = {
     "charu.doc": "rspa",
-    "figure.figsize": [91.5 * charu.pt, 91.5 * charu.pt],
+    "figure.figsize": [92 * charu.pt, 92 * charu.pt],
     "charu.tex": True,
     "charu.tex.font": "fourier",
     "xtick.minor.visible": False,

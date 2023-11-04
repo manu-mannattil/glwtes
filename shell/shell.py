@@ -3,13 +3,9 @@
 
 import dedalus.public as d3
 import numpy as np
-import os
-
-from scipy.integrate import trapezoid
 from utils import *
 
 from dedalus.tools.config import config
-
 config["logging"]["stdout_level"] = "debug"
 
 def shell_evp(

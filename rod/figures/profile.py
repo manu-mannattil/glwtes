@@ -8,9 +8,9 @@ from scipy.integrate import quad
 from utils import *
 
 rc = {
-    "charu.doc": "rspa",
-    "figure.figsize": [300 * charu.pt, 320 / charu.golden * charu.pt],
+    "charu.doc": "aps",
     "charu.tex": True,
+    "figure.figsize": [262 * charu.pt, 282 / charu.golden * charu.pt],
     "charu.tex.font": "fourier",
     "xtick.minor.visible": False,
     "ytick.minor.visible": False,
@@ -53,7 +53,7 @@ with plt.rc_context(rc):
     ax.set_ylim(-0.18, 0.18)
     ax.set_yticks([-b, 0, b])
     ax.set_xlabel(r"$\epsilon x$")
-    ax.text(-0.4, 0.46, r"$m_1(x)$", transform=ax.transAxes)
+    ax.text(-0.36, 0.26, r"$m_1(x)$", transform=ax.transAxes, rotation="vertical")
 
     ax.plot([-5, 5], [0, 0], linestyle="--", color="#999999")
     ax.plot([0, 0], [-1, 1], linestyle="--", color="#999999")
@@ -104,7 +104,8 @@ with plt.rc_context(rc):
     ax.set_ylim(-2 * a, 0.14)
     ax.set_yticks([a, 0.1])
     ax.set_xlabel(r"$\epsilon x$")
-    ax.text(-0.4, 0.46, r"$m_2(x)$", transform=ax.transAxes)
+    #ax.set_ylabel(r"$m_2(x)$")
+    ax.text(-0.36, 0.26, r"$m_2(x)$", transform=ax.transAxes, rotation="vertical")
 
     x = np.linspace(-5, 5, 500)
     ax.plot(x, b - (b - a) / np.cosh(x), zorder=10)
@@ -148,7 +149,7 @@ with plt.rc_context(rc):
 
     # Export ---------------------------------------------------------------
 
-    plt.tight_layout(w_pad=1)
+    plt.tight_layout()
     plt.savefig(
         "rod_profile.pdf",
         crop=True,

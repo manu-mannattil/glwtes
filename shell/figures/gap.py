@@ -6,7 +6,7 @@ import charu
 
 rc = {
     "charu.doc": "rspa",
-    "figure.figsize": [400 * charu.pt, 400 * charu.pt / charu.golden / 2.5],
+    "figure.figsize": [430 * charu.pt, 400 * charu.pt / charu.golden / 2.5],
     "charu.tex": True,
     "charu.tex.font": "fourier",
     "axes.axisbelow": False,
@@ -117,7 +117,7 @@ with plt.rc_context(rc):
             backgroundcolor="w",
             bbox=dict(facecolor="w", edgecolor="w", pad=1))
 
-    plt.tight_layout(w_pad=-0.1)
+    plt.tight_layout(w_pad=1)
     plt.savefig(
         "shell_gap_unannot.pdf",
         crop=True,

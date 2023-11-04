@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import charu
 from matplotlib.colors import LinearSegmentedColormap
-from scipy.integrate import quad
 from utils import *
 
 b = 0.1 # max curvature (tanh and sech)
@@ -13,8 +12,8 @@ a = 0.01 # min curvature (sech only)
 eps = 0.01 # slowness parameter
 
 rc = {
-    "charu.doc": "rspa",
-    "figure.figsize": [300 * charu.pt, 345 / charu.golden * charu.pt],
+    "charu.doc": "aps",
+    "figure.figsize": [320 * charu.pt, 350 / charu.golden * charu.pt],
     "charu.tex": True,
     "charu.tex.font": "fourier",
     "xtick.minor.visible": False,
@@ -30,8 +29,18 @@ def m1(x):
 def m2(x):
     return b - (b - a) * sech(x)
 
+def H(x, k, mode=1, mfunc=m1):
+    m = mfunc(x)
+    if mode == 1:
+        sign = 1
+    else:
+        sign = -1
+    return np.sqrt(0.5 * ((1 + k**2) * (k**2 + m**2) +
+                   sign * np.sqrt((k**2 - m**2)**2 * (1 - k**2)**2 + 4 * m**2 * k**2 *
+                                  (1 + k**2)**2)))
+
 @np.vectorize
-def ratio(x=0.1, k=0.1, mode=1, mfunc=m1):
+def ratio(x, k, mode=1, mfunc=m1):
     # Find the ratio of the transverse component (zeta) to the
     # longitudinal component (u) of the wave field.
     if mode == 1:
@@ -39,22 +48,21 @@ def ratio(x=0.1, k=0.1, mode=1, mfunc=m1):
     else:
         sign = -1
 
-    m = mfunc(x)
+    M = mfunc(x)
 
-    if m == 0:
+    if M == 0:
         if mode == 1:
             r = 1.0
         else:
             r = 0.0
     else:
-        w = np.sqrt(
-            0.5 * (k**4 + k**2 + m**2 + sign * np.sqrt((k**4 - k**2 + m**2)**2 + 4 * k**2 * m**2)))
-        a = abs(k * m)
-        b = abs(k**4 + m**2 - w**2)
+        w2 = 0.5 * ((1 + k**2) *
+                    (k**2 + M**2) + sign * np.sqrt((1 + k**2)**2 * (k**2 + M**2)**2 - 4 *
+                                                   (k**3 - k * M**2)**2))
+        a = k**4 + M**2 - w2
+        b = k * M + k**3 * M
 
-        r = a / (a + b)
-
-    return r
+        return np.abs(b) / (np.abs(a) + np.abs(b))
 
 @np.vectorize
 def ratio_approx(x=0.1, k=0.1, mode=1, mfunc=m1):
@@ -72,17 +80,6 @@ def rescale(m):
     a = m.flatten().min()
     b = m.flatten().max()
     return (m - a) / (b - a)
-
-with np.load("../data/rays.npz", allow_pickle=True) as pack:
-    sech1_eye = pack["sech1_eye"]
-    sech1_eyebrows = pack["sech1_eyebrows"]
-    sech1_eyelid = pack["sech1_eyelid"]
-    sech1_mark = pack["sech1_mark"]
-
-    tanh1_eye = pack["tanh1_eye"]
-    tanh1_eyebrows = pack["tanh1_eyebrows"]
-    tanh1_eyelid = pack["tanh1_eyelid"]
-    tanh1_mark = pack["tanh1_mark"]
 
 with plt.rc_context(rc):
     fig, axes = plt.subplots(2, 2)
@@ -106,17 +103,17 @@ with plt.rc_context(rc):
     ax.set_xlabel(r"$\epsilon x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center")
 
-    for r in tanh1_eye:
-        ax.plot(r[0], r[1], "k-")
+    name = "ho_tanh_bc_cc_b0.1_N_2048"
+    omega = np.loadtxt(f"../data/{name}/wkb.txt", unpack=True)[1]
 
-    for r in tanh1_mark:
-        ax.plot(r[0], r[1], "k-")
+    w = H(xx, kk)
 
-    for r in tanh1_eyebrows:
-        ax.plot(r[0], r[1], "k-")
+    ax.contour(xx, kk, w, colors="k", linestyles="-", levels=omega[1::2])
+    ax.contour(xx, kk, w, colors="k", linestyles="--", levels=[b])
 
-    for r in tanh1_eyelid:
-        ax.plot(r[0], r[1], color="k", linestyle="--", zorder=100)
+    # Lastly, plot the "eyebrows".
+    levels = [0.10440662, 0.12024195, 0.14398984, 0.17242652, 0.20359708, 0.2364232, 0.27030506]
+    ax.contour(xx, kk, w, colors="k", levels=levels)
 
     r = rescale(ratio(xx, kk, mode=1, mfunc=m1))
     pcm = ax.pcolormesh(xx, kk, r, cmap=BlueRed, shading="nearest", rasterized=True)
@@ -138,17 +135,17 @@ with plt.rc_context(rc):
     ax.set_xlabel(r"$\epsilon x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center", labelpad=0)
 
-    for r in sech1_eye:
-        ax.plot(r[0], r[1], "k-")
+    name = "ho_sech_bc_cc_b0.1_a0.01_N_2048"
+    omega = np.loadtxt(f"../data/{name}/wkb.txt", unpack=True)[1]
 
-    for r in sech1_mark:
-        ax.plot(r[0], r[1], "k-")
+    w = H(xx, kk, mfunc=m2)
 
-    for r in sech1_eyebrows:
-        ax.plot(r[0], r[1], "k-")
+    ax.contour(xx, kk, w, colors="k", linestyles="-", levels=omega[1::2])
+    ax.contour(xx, kk, w, colors="k", linestyles="--", levels=[b])
 
-    for r in sech1_eyelid:
-        ax.plot(r[0], r[1], color="k", linestyle="--", zorder=100)
+    # Lastly, plot the "eyebrows".
+    levels = [0.10440662, 0.12024195, 0.14398984, 0.17242652, 0.20359708, 0.2364232, 0.27030506]
+    ax.contour(xx, kk, w, colors="k", levels=levels)
 
     r = rescale(ratio(xx, kk, mode=1, mfunc=m2))
     pcm = ax.pcolormesh(xx, kk, r, cmap=BlueRed, shading="nearest", rasterized=True)
@@ -161,16 +158,16 @@ with plt.rc_context(rc):
 
     # tanh (localized) -----------------------------------------------------
 
-    name = "tanh_bc_cc_b0.1_N_2048"
+    name = "ho_tanh_bc_cc_b0.1_N_2048"
 
     pack = np.load("../data/{}.npz".format(name))
     x, evals, z, u = pack["x"], pack["evals"], pack["z"], pack["u"]
 
     ax = axes[1, 0]
 
-    i = 187
+    i = 209
 
-    z, u = normalize([z[i], u[i]], eps*x)
+    z, u = normalize([z[i], u[i]], eps * x)
     ax.plot(x * eps, z, "C3", label=r"$\zeta$")
     ax.plot(x * eps, u, "C0", label=r"$u$")
     ax.set_xlim((-5, 5))
@@ -199,16 +196,16 @@ with plt.rc_context(rc):
 
     # sech (localized) -----------------------------------------------------
 
-    name = "sech_bc_cc_b0.1_a0.01_N_2048"
+    name = "ho_sech_bc_cc_b0.1_a0.01_N_2048"
 
     pack = np.load("../data/{}.npz".format(name))
     x, evals, z, u = pack["x"], pack["evals"], pack["z"], pack["u"]
 
     ax = axes[1, 1]
 
-    i = 161
+    i = 181
 
-    z, u = normalize([z[i], u[i]], eps*x)
+    z, u = normalize([z[i], u[i]], eps * x)
     ax.plot(x * eps, z, "C3", label=r"$\zeta$")
     ax.plot(x * eps, u, "C0", label=r"$u$")
     ax.set_xlim((-5, 5))
@@ -223,7 +220,7 @@ with plt.rc_context(rc):
             backgroundcolor="w",
             bbox=dict(facecolor="w", edgecolor="w", pad=1))
 
-    xs = np.arccosh((b - a)/(b - evals[i]))
+    xs = np.arccosh((b - a) / (b - evals[i]))
     ax.plot([xs, xs], [-5, 5], "#999999", linestyle="--", zorder=-100)
     ax.plot([-xs, -xs], [-5, 5], "#999999", linestyle="--", zorder=-100)
 
@@ -237,7 +234,7 @@ with plt.rc_context(rc):
 
     # Export ---------------------------------------------------------------
 
-    plt.tight_layout()
+    plt.tight_layout(h_pad=2, w_pad=3)
     plt.savefig(
         "rod_bound_inc.pdf",
         crop=True,

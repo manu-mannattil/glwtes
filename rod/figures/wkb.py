@@ -7,8 +7,8 @@ import charu
 from utils import *
 
 rc = {
-    "charu.doc": "rspa",
-    "figure.figsize": [275 * charu.pt, 275 * charu.pt],
+    "charu.doc": "aps",
+    "figure.figsize": [262 * charu.pt, 282 / charu.golden * charu.pt],
     "charu.tex": True,
     "charu.tex.font": "fourier",
 }
@@ -35,13 +35,15 @@ with plt.rc_context(rc):
     ax.set_xticks(ticks)
     ax.set_yticks(ticks)
 
-    name = "tanh_bc_cc_b0.1_N_2048"
+    name = "ho_tanh_bc_cc_b0.1_N_2048"
     w_wkb = np.loadtxt(f"../data/{name}/wkb.txt", unpack=True)[1]
     w = np.loadtxt(f"../data/{name}/quantized.txt", unpack=True)[0]
 
     ax.plot(w_wkb, w, "C0o", markerfacecolor="none", markersize=size, markeredgewidth=0.5)
     ax.plot(w_guide, w_guide, color="#aaaaaa", zorder=-10)
     ax.text(*labelpos, r"\textbf{(a)}", transform=ax.transAxes)
+
+    print(f"tanh type: {len(w)} bound modes")
 
     # sech type ------------------------------------------------------------
 
@@ -55,13 +57,15 @@ with plt.rc_context(rc):
     ax.set_xticks(ticks)
     ax.set_yticks(ticks)
 
-    name = "sech_bc_cc_b0.1_a0.01_N_2048"
+    name = "ho_sech_bc_cc_b0.1_a0.01_N_2048"
     w_wkb = np.loadtxt(f"../data/{name}/wkb.txt", unpack=True)[1]
     w = np.loadtxt(f"../data/{name}/quantized.txt", unpack=True)[0]
 
     ax.plot(w_wkb, w, "C0o", markerfacecolor="none", markersize=size, markeredgewidth=0.5)
     ax.plot(w_guide, w_guide, color="#aaaaaa", zorder=-10)
     ax.text(*labelpos, r"\textbf{(b)}", transform=ax.transAxes)
+
+    print(f"sech type: {len(w)} bound modes")
 
     plt.tight_layout(w_pad=2)
     plt.savefig(

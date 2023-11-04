@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import charu
 from matplotlib.colors import LinearSegmentedColormap
-from scipy.integrate import quad
 from utils import *
 
 b = 0.1 # max curvature (tanh and sech)
@@ -13,8 +12,8 @@ a = 0.01 # min curvature (sech only)
 eps = 0.01 # slowness parameter
 
 rc = {
-    "charu.doc": "rspa",
-    "figure.figsize": [300 * charu.pt, 345 / charu.golden * charu.pt],
+    "charu.doc": "aps",
+    "figure.figsize": [320 * charu.pt, 350 / charu.golden * charu.pt],
     "charu.tex": True,
     "charu.tex.font": "fourier",
     "xtick.minor.visible": False,
@@ -30,8 +29,18 @@ def m1(x):
 def m2(x):
     return b - (b - a) * sech(x)
 
+def H(x, k, mode=1, mfunc=m1):
+    m = mfunc(x)
+    if mode == 1:
+        sign = 1
+    else:
+        sign = -1
+    return np.sqrt(0.5 * ((1 + k**2) * (k**2 + m**2) +
+                   sign * np.sqrt((k**2 - m**2)**2 * (1 - k**2)**2 + 4 * m**2 * k**2 *
+                                  (1 + k**2)**2)))
+
 @np.vectorize
-def ratio(x=0.1, k=0.1, mode=1, mfunc=m1):
+def ratio(x, k, mode=1, mfunc=m1):
     # Find the ratio of the transverse component (zeta) to the
     # longitudinal component (u) of the wave field.
     if mode == 1:
@@ -39,22 +48,21 @@ def ratio(x=0.1, k=0.1, mode=1, mfunc=m1):
     else:
         sign = -1
 
-    m = mfunc(x)
+    M = mfunc(x)
 
-    if m == 0:
+    if M == 0:
         if mode == 1:
             r = 1.0
         else:
             r = 0.0
     else:
-        w = np.sqrt(
-            0.5 * (k**4 + k**2 + m**2 + sign * np.sqrt((k**4 - k**2 + m**2)**2 + 4 * k**2 * m**2)))
-        a = abs(k * m)
-        b = abs(k**4 + m**2 - w**2)
+        w2 = 0.5 * ((1 + k**2) *
+                    (k**2 + M**2) + sign * np.sqrt((1 + k**2)**2 * (k**2 + M**2)**2 - 4 *
+                                                   (k**3 - k * M**2)**2))
+        a = k**4 + M**2 - w2
+        b = k * M + k**3 * M
 
-        r = a / (a + b)
-
-    return r
+        return np.abs(b) / (np.abs(a) + np.abs(b))
 
 @np.vectorize
 def ratio_approx(x=0.1, k=0.1, mode=1, mfunc=m1):
@@ -72,12 +80,6 @@ def rescale(m):
     a = m.flatten().min()
     b = m.flatten().max()
     return (m - a)/(b - a)
-
-with np.load("../data/rays.npz", allow_pickle=True) as pack:
-    tanh2_mark = pack["tanh2_mark"]
-    tanh2_rays = pack["tanh2_rays"]
-    sech2_mark = pack["sech2_mark"]
-    sech2_rays = pack["sech2_rays"]
 
 with plt.rc_context(rc):
     fig, axes = plt.subplots(2, 2)
@@ -101,11 +103,22 @@ with plt.rc_context(rc):
     ax.set_xlabel(r"$\epsilon x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center")
 
-    for r in tanh2_rays:
-        ax.plot(r[0], r[1], "k-")
+    # Mark a ray for highlighting.
+    w_mark = 0.09
+    k_mark = np.sqrt(w_mark)
 
-    for r in tanh2_mark:
-        ax.plot(r[0], r[1], "k-")
+    # Trace remaining rays.
+    k1 = np.linspace(0, k_mark, 6)[2:]
+    dk = k1[1] - k1[0]
+    k2 = np.arange(k_mark + dk, 0.5, dk)
+    omega = np.concatenate((k1, k2))**2
+
+    w = H(xx, kk, mode=2)
+
+    ax.contour(xx, kk, w, colors="k", linestyles="-", levels=omega)
+
+    omega_saddle = [0.0018]
+    ax.contour(xx, kk, w, colors="k", linestyles="-", levels=omega_saddle)
 
     ax.plot([-5, 5], [0, 0], "k-")
 
@@ -129,11 +142,22 @@ with plt.rc_context(rc):
     ax.set_xlabel(r"$\epsilon x$")
     ax.set_ylabel(r"$k$", rotation=0, va="center", labelpad=0)
 
-    for r in sech2_rays:
-        ax.plot(r[0], r[1], "k-")
+    # Mark a ray for highlighting.
+    w_mark = 0.0667
+    k_mark = np.sqrt(w_mark)
 
-    for r in sech2_mark:
-        ax.plot(r[0], r[1], "k-")
+    # Trace remaining rays.
+    k1 = np.linspace(0, k_mark, 6)[2:]
+    dk = k1[1] - k1[0]
+    k2 = np.arange(k_mark + dk, 0.5, dk)
+    omega = np.concatenate((k1, k2))**2
+
+    w = H(xx, kk, mode=2, mfunc=m2)
+
+    ax.contour(xx, kk, w, colors="k", linestyles="-", levels=omega)
+
+    omega_saddle = [0.00125]
+    ax.contour(xx, kk, w, colors="k", linestyles="-", levels=omega_saddle)
 
     ax.plot([-5, 5], [0, 0], "k-")
 
@@ -154,7 +178,7 @@ with plt.rc_context(rc):
     x, evals, z, u = pack["x"], pack["evals"], pack["z"], pack["u"]
 
     ax = axes[1, 0]
-    
+
     i = 187
 
     z, u = normalize([z[i + 1], u[i + 1]], eps*x)
@@ -208,7 +232,7 @@ with plt.rc_context(rc):
 
     # Export ---------------------------------------------------------------
 
-    plt.tight_layout()
+    plt.tight_layout(h_pad=2, w_pad=3)
     plt.savefig(
         "rod_extended_inc.pdf",
         crop=True,
