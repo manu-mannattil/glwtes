@@ -141,19 +141,19 @@ a = 0.01
 
 # tanh type ------------------------------------------------------------
 
-# form = "tanh"
-# name = f"{form}_bc_{bc}_b{b}_N_{N}"
-# m = lambda x: b * np.tanh(x)
-# dm = lambda x: b * sech(x) ** 2
-# d2m = lambda x: -2*b*sech(x)**2*np.tanh(x)
+form = "tanh"
+name = f"{form}_bc_{bc}_b{b}_N_{N}"
+m = lambda x: b * np.tanh(x)
+dm = lambda x: b * sech(x) ** 2
+d2m = lambda x: -2*b*sech(x)**2*np.tanh(x)
 
 # sech type ------------------------------------------------------------
 
-form = "sech"
-name = f"{form}_bc_{bc}_b{b}_a{a}_N_{N}"
-m = lambda x: b - (b - a) * sech(x)
-dm = lambda x: (b - a) * np.tanh(x) * sech(x)
-d2m = lambda x: (b - a) * (-sech(x)**3 + sech(x)*np.tanh(x)**2)
+# form = "sech"
+# name = f"{form}_bc_{bc}_b{b}_a{a}_N_{N}"
+# m = lambda x: b - (b - a) * sech(x)
+# dm = lambda x: (b - a) * np.tanh(x) * sech(x)
+# d2m = lambda x: (b - a) * (-sech(x)**3 + sech(x)*np.tanh(x)**2)
 
 # Run ------------------------------------------------------------------
 
